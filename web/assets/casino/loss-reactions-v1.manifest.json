@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "status": "refused_no_artifact",
+  "method": "Codex built-in image_gen.imagegen",
+  "attempt_count": 1,
+  "http_status": 400,
+  "error_type": "image_generation_user_error",
+  "error_code": "moderation_blocked",
+  "moderation_stage": "output",
+  "moderation_categories": [
+    "other"
+  ],
+  "intended_output": "loss-reactions-v1.png",
+  "output_file": null,
+  "output_width": null,
+  "output_height": null,
+  "output_mode": null,
+  "output_sha256": null,
+  "transparent_background": true,
+  "reference_images": [
+    {
+      "file": "action-patrick.png",
+      "bytes": 1091801,
+      "width": 1261,
+      "height": 1247,
+      "mode": "RGBA",
+      "sha256": "c41abeffe0178739e81fee9172716be4ccfdfefafe9cf9930af507f82a2f6755"
+    },
+    {
+      "file": "action-squidward.png",
+      "bytes": 1142644,
+      "width": 1261,
+      "height": 1247,
+      "mode": "RGBA",
+      "sha256": "a9753dd23cf4be9b74f41e86f43296cbd7cb0d4e76b50269ea9a6339424f5e7c"
+    },
+    {
+      "file": "action-krabs.png",
+      "bytes": 1075957,
+      "width": 1261,
+      "height": 1247,
+      "mode": "RGBA",
+      "sha256": "26414cdc9cadc70b3130f251486f62b641fe13329d0f945ff5b3a268c0119c89"
+    },
+    {
+      "file": "action-plankton-gary.png",
+      "bytes": 1243458,
+      "width": 1774,
+      "height": 887,
+      "mode": "RGBA",
+      "sha256": "129160d0b3f59f35383fbb70dc36df629beebc1b977329d4e74cd58ab90a0fc3"
+    },
+    {
+      "file": "table-portraits.png",
+      "bytes": 1277781,
+      "width": 1261,
+      "height": 1247,
+      "mode": "RGBA",
+      "sha256": "8a5741fe309961dab62dd733169d3805b4b70b0fd05416b2f804c92d8aaab54a"
+    }
+  ],
+  "referenced_image_paths": [
+    "web/assets/casino/action-patrick.png",
+    "web/assets/casino/action-squidward.png",
+    "web/assets/casino/action-krabs.png",
+    "web/assets/casino/action-plankton-gary.png",
+    "web/assets/casino/table-portraits.png"
+  ],
+  "requested_layout": {
+    "columns": 3,
+    "rows": 2,
+    "cells": [
+      {
+        "character": "patrick",
+        "column": 0,
+        "row": 0
+      },
+      {
+        "character": "spongebob",
+        "column": 1,
+        "row": 0
+      },
+      {
+        "character": "squidward",
+        "column": 2,
+        "row": 0
+      },
+      {
+        "character": "plankton",
+        "column": 0,
+        "row": 1
+      },
+      {
+        "character": "krabs",
+        "column": 1,
+        "row": 1
+      },
+      {
+        "character": null,
+        "column": 2,
+        "row": 1
+      }
+    ]
+  },
+  "prompt": "Use case: illustration-story.\nAsset type: NEW transparent raster losing-reaction sprite sheet for an existing local cartoon card-table game.\nPrimary request: five recognizable sad/disappointed reactions to losing a round, matching the approved cast artwork in the supplied references. This is a separate reaction asset, not a replacement action atlas.\nInput images: Image 1 action-patrick.png is Patrick's appearance/style reference. Image 2 action-squidward.png is Squidward's appearance/style reference. Image 3 action-krabs.png is Mr. Krabs' appearance/style reference. Image 4 action-plankton-gary.png supplies TOP ROW PLANKTON ONLY as his appearance/style reference; exclude Gary entirely. Image 5 table-portraits.png supplies TOP RIGHT SPONGEBOB as his appearance/style reference. Other cells are supporting cast/style references only. Preserve the existing approved recognizable faces, species, clothing, palette, black outlines, softly shaded 2D cartoon rendering and upper-body/bust framing.\nComposition: exactly THREE equal columns by TWO equal rows, six equal square cells on a landscape canvas, generous genuinely transparent margins around each character, no panel lines. TOP LEFT Patrick Star (pink starfish with purple eyelids and green/purple floral shorts), TOP MIDDLE SpongeBob (yellow square sponge, white shirt, red tie, brown trousers), TOP RIGHT Squidward (turquoise head, long nose, brown collared shirt). BOTTOM LEFT Plankton (small green one-eyed character with both long antennae, complete body), BOTTOM MIDDLE Mr. Krabs (red crab, complete eyestalks, light blue collared shirt and belt), BOTTOM RIGHT completely EMPTY TRANSPARENT CELL.\nReaction direction: Patrick has a clearly downturned disappointed mouth, worried raised inner brows, downcast eyes and slumped shoulders, arms lowered. SpongeBob has large sad blue eyes, raised inner brows, downturned mouth with recognizable two front teeth, drooping shoulders, hands lowered. Squidward looks crestfallen and resigned, tired lowered eyelids and a clear frown, shoulders sagged, arms lowered. Plankton has one dejected downcast yellow/red eye, drooping antennae and a small disappointed frown, arms hanging. Mr. Krabs looks comically heartbroken about losing, downcast eyestalks, clear downturned mouth and drooped claws near his torso. Keep sadness readable at small game-seat sizes and distinct from the existing smiling action poses. Gentle cartoon disappointment only.\nConstraints: each character entirely contained in its own cell with transparent padding and a consistent centered seat anchor. Crop busts naturally at the waist as in the references; retain complete heads, hands/claws and antennae. Patrick remains the same starfish avatar used for the HUMAN PLAYER, not a human redesign. No Gary/dealer, no extra character, no table, playing cards, counters, chips, money, environment, speech bubble, text, caption, numbers, labels, border, logos, watermark, 3D or SVG substitute. Genuine transparent RGBA background, not white or a drawn checkerboard. Preserve all original source files; output is a new sibling reaction sheet. Runtime will show these expressions only after an actual losing result; this asset does not determine outcomes.",
+  "notes": [
+    "No image bytes or generated output file were returned.",
+    "All five reference files were opened, visually inspected and decoded; recorded source digests still match.",
+    "No retry, alternate provider, paid API, CLI, procedural substitute, runtime wiring or original image modification.",
+    "Prior cheek/logo/SpongeBob action-atlas refusals remain preserved in their existing records. This was one newly requested losing-reaction sheet."
+  ]
+}

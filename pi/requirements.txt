@@ -1,0 +1,4 @@
+sounddevice==0.5.6
+# Optional physical adapters, installed only on the Pi when selected:
+# gpiozero
+# adafruit-circuitpython-servokit

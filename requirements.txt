@@ -1,0 +1,8 @@
+pywebview==6.2.1
+sounddevice==0.5.6
+numpy>=1.26,<3
+icalendar==6.3.2
+recurring-ical-events==3.8.2
+x-wr-timezone==2.0.1
+python-dateutil==2.9.0.post0
+tzdata==2026.5

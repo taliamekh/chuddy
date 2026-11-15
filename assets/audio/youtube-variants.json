@@ -1,0 +1,80 @@
+[
+  {
+    "file": "fart-youtube-01.wav",
+    "source_start_s": 0.77,
+    "duration_s": 1.15,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-02.wav",
+    "source_start_s": 3.12,
+    "duration_s": 0.6,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-03.wav",
+    "source_start_s": 5.12,
+    "duration_s": 0.6,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-04.wav",
+    "source_start_s": 7.52,
+    "duration_s": 0.45,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-05.wav",
+    "source_start_s": 9.47,
+    "duration_s": 0.75,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-06.wav",
+    "source_start_s": 11.12,
+    "duration_s": 0.9,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-07.wav",
+    "source_start_s": 13.32,
+    "duration_s": 0.8,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-08.wav",
+    "source_start_s": 15.72,
+    "duration_s": 1.85,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-09.wav",
+    "source_start_s": 19.47,
+    "duration_s": 1.4,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-10.wav",
+    "source_start_s": 22.72,
+    "duration_s": 0.35,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-11.wav",
+    "source_start_s": 23.22,
+    "duration_s": 0.85,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-12.wav",
+    "source_start_s": 26.87,
+    "duration_s": 0.75,
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "fart-youtube-13.wav",
+    "source_start_s": 28.97,
+    "duration_s": 1.95,
+    "license": "CC0-1.0"
+  }
+]

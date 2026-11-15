@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#fff9f1"><title>Chuddy — your very supportive friend</title>
+  <link rel="stylesheet" href="/web/style.css"><link rel="stylesheet" href="/web/earnings.css"><link rel="stylesheet" href="/web/casino-room.css"><link rel="stylesheet" href="/web/chud-cursor.css"><link rel="stylesheet" href="/web/concise-ui.css">
+  <script src="/web/ui-utils.js" defer></script><script src="/web/monies.js" defer></script><script src="/web/character-rig.js" defer></script><script src="/web/chud-cursor.js" defer></script><script src="/web/casino-room.js" defer></script><script src="/web/app.js" defer></script>
+</head>
+<body>
+<svg class="icon-library" aria-hidden="true"><defs>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-work" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="3"/><path d="M8 7V4h8v3M3 12h18M10 12v3h4v-3"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18M8 15h2m4 0h2"/></symbol>
+  <symbol id="i-game" viewBox="0 0 24 24"><path d="M7 7h10c3 0 5 11 3 12-2 2-5-3-5-3H9s-3 5-5 3C2 18 4 7 7 7Z"/><path d="M8 10v5m-2.5-2.5h5m5-1h.01m2 2h.01"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M9 4v6m6 4v6"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3zm13-1c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+</defs></svg>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#companion" aria-label="Chuddy home">
+      <span class="brand-wordmark">chuddy</span>
+      <img class="brand-mark" src="/web/assets/chuddy/brand.svg" width="44" height="44" alt="">
+    </a>
+
+    <nav aria-label="Main navigation">
+      <button class="nav-item selected" data-page="companion"><svg><use href="#i-home"/></svg>Companion<span class="nav-dot"></span></button>
+      <button class="nav-item" data-page="rules"><svg><use href="#i-work"/></svg>Work detection</button>
+      <button class="nav-item" data-page="deadlines"><svg><use href="#i-calendar"/></svg>Deadlines<span class="nav-count" id="deadline-count">0</span></button>
+      <button class="nav-item" data-page="casino"><svg><use href="#i-game"/></svg>Clam Casino</button>
+      <button class="nav-item" data-page="settings"><svg><use href="#i-settings"/></svg>Companion studio</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="monies-status"><b id="monies-balance">— monies</b><span id="monies-rate">Connecting…</span></div>
+
+      <div class="local-status"><span class="status-dot" id="local-dot"></span><div><b id="local-label">Waking up…</b><small id="local-detail"></small></div></div>
+      <button class="profile-button" data-page="leaderboard"><span class="avatar" id="profile-initial">Y</span><span><b id="profile-name">You</b></span><span>⌄</span></button>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <span class="breadcrumb" id="breadcrumb">YOUR VERY SUPPORTIVE FRIEND</span>
+      <div class="top-controls">
+        <span class="session-state" id="session-state"><span class="status-dot"></span>Session stopped</span>
+        <dl class="session-scoreboard" aria-label="Fart count and monies boost">
+          <div><dt>Farts</dt><dd id="session-farts">—</dd></div>
+          <div><dt>Monies boost</dt><dd id="session-boost">—</dd></div>
+        </dl>
+        <button class="button small primary" id="session-start">Start a session <span>↗</span></button>
+      </div>
+    </header>
+    <div id="connection-banner" class="connection-banner" hidden>Companion connection lost. Controls will reconnect automatically.</div>
+    <main>
+      <section class="page" id="page-companion" aria-label="Companion">
+        <div class="companion-grid">
+          <div class="character-card">
+            <div class="card-top"><span class="pill lime"><span class="status-dot"></span>FRIEND MODE</span><button class="icon-button" id="voice-toggle" title="Enable spoken replies" aria-label="Toggle spoken replies" aria-pressed="false"><svg><use href="#i-volume"/></svg></button></div>
+            <span class="doodle doodle-one">✧</span><span class="doodle doodle-two">✳</span><span class="doodle doodle-three">✦</span>
+            <div class="character-stage"><div class="character-halo"></div><div class="chuddy-character chuddy-raster" id="chuddy-character" role="img" aria-label="Chuddy: a sleepy pink starfish with a big belly, lime shorts and purple flowers" data-expression="neutral"><img class="raster-loading-reference" src="/reference.png" alt=""><div class="raster-frame-fallback" aria-hidden="true"></div><canvas id="chuddy-canvas" aria-hidden="true"></canvas></div><div class="character-shadow"></div><button class="belly-button" id="belly-button" aria-label="Press Chuddy's belly to run the hardware simulator" title="Press my belly"></button></div>
+            <div class="character-caption"><span id="character-activity"></span><span class="character-art-status" id="character-art-status" hidden></span></div>
+            <div class="character-footer"><span id="hardware-caption">PI SIMULATOR · SPRAY DISABLED</span><button class="text-button" data-page="settings">Meet the setup ↗</button></div>
+          </div>
+          <div class="chat-card">
+            <div class="chat-heading"><div><h2>A very important conversation</h2><span id="chat-provenance" hidden></span></div><span class="pill neutral" id="agent-badge">Connecting</span></div>
+            <div class="chat-messages" id="chat-messages" role="log" aria-label="Conversation history" aria-live="polite" aria-relevant="additions"></div>
+            <div class="agent-draft" id="agent-draft" hidden><span class="thinking-dots"><i></i><i></i><i></i></span><span id="draft-text">Ummm…</span></div>
+            <form id="chat-form" class="chat-form"><label class="sr-only" for="chat-input">Message Chuddy</label><textarea id="chat-input" rows="1" maxlength="2000" placeholder="Tell me what's on your mind…" required></textarea><button type="button" class="icon-button" id="turn-cancel" title="Cancel current turn" aria-label="Cancel current response" hidden>×</button><button type="submit" class="send-button" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button><button type="button" class="icon-button microphone-toggle" id="ptt-toggle" title="Turn on microphone" aria-label="Turn on microphone" aria-pressed="false" disabled><span aria-hidden="true">+</span></button></form>
+            <div class="chat-footnote"><div class="chat-output-status"><span id="voice-state" role="status">Voice: checking output status…</span><span id="mic-state" role="status" hidden>Microphone on</span></div><button class="text-button" data-page="settings">Text & voice settings ↗</button></div>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <button class="summary-card" data-page="deadlines"><span class="summary-icon purple"><svg><use href="#i-calendar"/></svg></span><span><small>UPCOMING DEADLINE</small><b id="next-deadline">Suspiciously clear calendar</b><span id="next-due"></span></span><span class="summary-arrow">↗</span></button>
+        </div>
+      </section>
+
+      <section class="page" id="page-rules" aria-labelledby="rules-title" hidden>
+        <div class="page-heading"><div><h1 id="rules-title">Work detection<span class="coral">.</span></h1></div></div>
+        <div class="form-actions"><button class="button small" id="test-trigger">Try a test interruption</button></div>
+        <div class="two-columns"><details class="card rule-overrides"><summary>Custom overrides</summary><div class="section-heading"><button class="button small" id="add-rule">+ Add rule</button></div><div id="rules-list" class="rules-list"></div><div class="form-actions"><button class="button primary" id="save-rules">Save overrides</button></div></details>
+        <div class="stack"><div class="card"><h2>Interruption settings</h2><form id="session-settings-form"><label class="check-label"><input type="checkbox" id="ai-work-detection" checked>Use local AI for activity categories</label><label>Open after interruption<select id="distraction-destination"><option value="casino">Open the Clam Casino</option><option value="league">Open League of Legends</option><option value="lcbo">Open LCBO in Chrome</option><option value="beer_store">Open The Beer Store in Chrome</option></select></label><p class="small-note" id="desktop-interception-status"></p><label>Cooldown between interruptions (seconds)<input type="number" id="cooldown" min="0" max="3600" value="90" required></label><button class="button" type="submit">Save session settings</button></form></div><div class="card browser-card"><h2>Optional URL reporting</h2><span class="status-line" id="browser-status"></span><button class="button" id="open-pairing">Show pairing setup ↗</button><div id="pairing-panel" hidden><ol><li>Open <b>chrome://extensions</b> or <b>edge://extensions</b>.</li><li>Enable Developer mode and choose <b>Load unpacked</b>, selecting this project's <b>extension</b> folder.</li><li>Open the extension, paste the pairing token below, choose rules and enable reporting.</li></ol><label>Desktop address<input id="pairing-address" readonly></label><label>Browser-only pairing token<input id="pairing-token" type="password" readonly></label><button class="button small" id="copy-pairing">Copy token</button></div></div></div></div>
+      </section>
+
+      <section class="page" id="page-deadlines" aria-labelledby="deadlines-title" hidden>
+        <div class="page-heading"><div><h1 id="deadlines-title">Deadlines<span class="coral">.</span></h1></div></div>
+        <div class="two-columns"><div class="card"><div class="section-heading"><h2>Your synced deadlines</h2><button class="button small" id="deadline-refresh">Refresh now</button></div><div id="deadlines-list" class="deadlines-list"></div></div><div class="stack">
+          <div class="card"><h2>Connect your calendars</h2>
+            <form class="calendar-connect-form" data-provider="google"><h3>Google Calendar</h3><label>Private iCal link<input name="url" type="password" autocomplete="off" required aria-label="Google Calendar private iCal link"></label><div class="button-row"><button class="button" type="submit">Connect Google Calendar</button><button class="button small" type="button" data-calendar-disconnect="google">Disconnect</button></div><p id="calendar-google-status" class="status-line">Not connected</p></form>
+            <form class="calendar-connect-form" data-provider="brightspace"><h3>Brightspace</h3><label>Private calendar feed<input name="url" type="password" autocomplete="off" required aria-label="Brightspace private calendar feed"></label><div class="button-row"><button class="button" type="submit">Connect Brightspace</button><button class="button small" type="button" data-calendar-disconnect="brightspace">Disconnect</button></div><p id="calendar-brightspace-status" class="status-line">Not connected</p></form>
+          </div></div></div>
+      </section>
+
+      <section class="page" id="page-leaderboard" aria-labelledby="leaderboard-title" hidden>
+        <div class="page-heading"><div><h1 id="leaderboard-title">Leaderboard<span class="coral">.</span></h1></div><button class="button" id="friends-sync">Sync friends ↗</button></div>
+        <div class="leaderboard-periods" role="group" aria-label="Leaderboard period"><button class="button" data-leaderboard-period="today">Best today</button><button class="button" data-leaderboard-period="week">Best this week</button><button class="button" data-leaderboard-period="all_time" aria-pressed="true">Best all time</button></div>
+        <div class="metric-grid"><div class="metric-card pink"><span>FARTS</span><b id="score-total">0</b></div></div>
+        <div class="two-columns"><div class="stack"><div class="card"><div class="section-heading"><h2>The local legends</h2><span class="pill neutral">THIS DEVICE</span></div><div id="leaderboard-list"></div><div class="profile-editor"><label>Current profile<select id="profile-select"></select></label><form id="profile-form" class="inline-form"><label class="sr-only" for="new-profile-name">New profile name</label><input id="new-profile-name" placeholder="A friend's pseudonym" maxlength="40" required><button class="button" type="submit">Add profile</button></form></div></div><div class="card"><div class="section-heading"><h2>Friends room</h2><span class="pill neutral" id="friends-status">NOT CONNECTED</span></div><div id="friends-ranking"><span class="muted">No friends connected</span></div></div><div class="card"><h2>Score history</h2><div id="score-events" class="event-list"></div></div></div>
+        <div class="stack"><div class="card"><h2>Fart tests</h2><div class="sound-buttons"><button class="button" data-sound="fart">Play fart test ↗</button><button class="button subtle" data-score="fart">+ Manual fart</button></div></div><div class="card mic-card"><div class="section-heading"><h2>Microphone</h2><span class="pill neutral" id="mic-badge">OFF</span></div><div class="audio-meter" role="meter" aria-label="Microphone input level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="audio-meter"><span></span></div><p class="status-line" id="audio-status">Not recording</p><p class="small-note" id="classifier-status">Checking classifier…</p><button class="button" id="mic-start"><svg><use href="#i-mic"/></svg>Start microphone</button><button class="button stop" id="mic-stop" hidden>Stop microphone</button></div></div></div>
+      </section>
+
+      <section class="page" id="page-settings" aria-labelledby="settings-title" hidden>
+        <div class="page-heading"><div><h1 id="settings-title">Companion studio<span class="coral">.</span></h1></div></div>
+        <details class="trace-card"><summary>Agent details</summary><div id="agent-trace" class="trace-body">No actions yet</div><div class="trace-body" id="real-clock">Real time: —</div></details>
+        <div class="settings-grid"><div class="stack"><div class="card"><div class="section-heading"><div><h2>Local AI</h2></div><span class="pill neutral" id="model-status">UNKNOWN</span></div><form id="model-form"><label class="check-label"><input type="checkbox" id="ai-enabled"><span>Enable the local AI agent</span></label><label>Ollama address<input id="ai-endpoint" type="url" value="http://127.0.0.1:11434" required></label><label>Local model<input id="ai-model" value="llama3.1:8b-instruct-q4_K_M" maxlength="100" required></label><div class="form-actions"><button type="submit" class="button primary">Save local brain</button><button type="button" class="button" id="model-warm">Prepare model</button></div></form><p class="small-note" id="agent-error"></p><div class="diagnostic" id="agent-metrics"></div></div><div class="card"><h2>Voice & sound</h2><form id="voice-form"><label class="check-label"><input type="checkbox" id="voice-enabled"><span>Speak replies aloud</span></label><label>Voice engine<select id="voice-engine"><option value="auto">Automatic local voice</option><option value="reference">Reference-conditioned local voice</option><option value="windows">Windows fallback (generic voice)</option><option value="off">Off</option></select></label><label class="check-label"><input type="checkbox" id="beer-joke"><span>Allow optional, audible beer jokes</span></label><div class="form-actions"><button type="submit" class="button">Save voice choices</button><button type="button" class="button" id="voice-test">Hear a voice test</button></div></form><div class="status-line" id="voice-details"></div></div><div class="card"><h2>Animation &amp; expressions</h2><label class="check-label motion-preference"><input type="checkbox" id="reduced-motion"><span>Keep companion animation still</span></label><label class="expression-label">Expression preview<select id="expression-preview"><option value="auto">Follow the companion</option><option value="neutral">Neutral</option><option value="thinking">Thinking - art revision pending</option><option value="confused">Confused - art revision pending</option><option value="happy">Happy</option><option value="smug">Smug</option><option value="weary">Weary - art revision pending</option></select></label></div><div class="card"><h2>Audio input settings</h2><form id="audio-form"><label>Microphone mode<select id="microphone-mode"><option value="push_to_talk" selected>Push to talk</option><option value="always_listening">Always listening</option></select></label><label>Microphone device<select id="audio-device"><option value="">System default</option></select></label><label>Classifier threshold<input id="audio-threshold" type="number" min="0.01" max="1" step="0.01" value="0.35" required></label><button type="submit" class="button">Save audio settings</button><button type="button" class="text-button" id="refresh-devices">Refresh devices ↻</button></form></div></div>
+        <div class="stack"><div class="card hardware-card"><div class="section-heading"><div><h2>Hardware simulator</h2></div><span class="pill lime">YAW ONLY</span></div><div class="pi-visual"><div class="mini-character" id="mini-character" role="img" aria-label="Simulated Chuddy yaw orientation"><div class="mini-raster-sprite"></div></div><div class="barrel"><i></i><i></i></div><span>RASPBERRY PI · FIXED BASE</span></div><div class="hardware-readout"><span>Mode <b id="hardware-mode">Simulator</b></span><span>Yaw <b id="hardware-yaw">0°</b></span><span>Phase <b id="hardware-phase">Idle</b></span><span>Spray <b id="hardware-spray">Disabled</b></span></div><button class="button" id="simulate-belly">Run belly simulator ↗</button><form id="pi-form"><label>Pi service address<input id="pi-url" type="url" placeholder="http://192.168.1.50:8766"></label><label>Pi token <input id="pi-token" type="password" autocomplete="off" placeholder="Not configured"></label><button type="submit" class="button">Save Pi connection</button></form><div class="button-row"><button class="button small" id="pi-status">Query Pi status</button><button class="button small" id="pi-belly">Request Pi belly sequence</button></div><pre class="diagnostic" id="pi-result" hidden></pre><div class="pi-bridge-panel"><h3>Pi event connection</h3><p class="status-line" id="pi-bridge-status">Disconnected</p><div class="button-row"><button class="button small" id="pi-connect">Connect Pi events</button><button class="button small" id="pi-disconnect" disabled>Disconnect Pi</button></div><div class="button-row"><button class="button small" id="pi-mic-start" disabled>Start Pi microphone</button><button class="button small stop" id="pi-mic-stop" hidden>Stop Pi microphone</button></div><p class="small-note" id="pi-mic-status">Pi microphone off</p><details class="pi-events"><summary>Pi event trace</summary><pre id="pi-bridge-events" class="diagnostic">No events received.</pre></details></div></div><div class="card"><h2>Friends service</h2><form id="friends-form"><label>Service address<input id="friends-url" type="url" placeholder="http://127.0.0.1:8770"></label><label>Room name<input id="friends-room" maxlength="80" value="chuddy-club" required></label><label>Room invitation token <input id="friends-token" type="password" autocomplete="off" placeholder="Not configured"></label><button type="submit" class="button">Save friends connection</button></form></div><div class="card"><h2>Saved memory</h2><div id="memory-list" class="memory-list"></div></div><details class="card reference-card"><summary>Preserved appearance reference ↗</summary><img src="/reference.png" alt="Original supplied Patrick-inspired Chuddy appearance reference"></details></div></div>
+      </section>
+      <section class="page" id="page-casino" aria-label="Clam Casino" hidden><div id="casino-room"></div></section>
+    </main>
+  </div>
+</div>
+<form id="admin-console" class="admin-console" hidden autocomplete="off"><label class="sr-only" for="admin-command">Admin cheat</label><input id="admin-command" spellcheck="false" placeholder="monies 1000" aria-describedby="admin-result"><button type="submit" class="button small">Run</button><span id="admin-result" role="status"></span></form>
+<div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+</body></html>

@@ -1,0 +1,51 @@
+[
+  {
+    "file": "action-gary-dealer-clean.png",
+    "width": 1774,
+    "height": 887,
+    "mode": "RGBA",
+    "sha256": "5fe3b1c654c2435fef846aa793a8fe75704ca885a1d79e9b82ae6d063258e836"
+  },
+  {
+    "file": "action-gary-suit.png",
+    "width": 1774,
+    "height": 887,
+    "mode": "RGBA",
+    "sha256": "f7823652dc4137f4e8bba5600851e36ec9c1221fe10943483e611f6e4eeea143"
+  },
+  {
+    "file": "golden-reef-room.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "5e74a6a630f5727812226cb1495cbb556383c73b2a5b448f7fe149fd58b6e82d"
+  },
+  {
+    "file": "action-krabs.png",
+    "width": 1261,
+    "height": 1247,
+    "mode": "RGBA",
+    "sha256": "26414cdc9cadc70b3130f251486f62b641fe13329d0f945ff5b3a268c0119c89"
+  },
+  {
+    "file": "action-patrick.png",
+    "width": 1261,
+    "height": 1247,
+    "mode": "RGBA",
+    "sha256": "c41abeffe0178739e81fee9172716be4ccfdfefafe9cf9930af507f82a2f6755"
+  },
+  {
+    "file": "action-plankton-gary.png",
+    "width": 1774,
+    "height": 887,
+    "mode": "RGBA",
+    "sha256": "129160d0b3f59f35383fbb70dc36df629beebc1b977329d4e74cd58ab90a0fc3"
+  },
+  {
+    "file": "action-squidward.png",
+    "width": 1261,
+    "height": 1247,
+    "mode": "RGBA",
+    "sha256": "a9753dd23cf4be9b74f41e86f43296cbd7cb0d4e76b50269ea9a6339424f5e7c"
+  }
+]

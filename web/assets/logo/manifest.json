@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "status": "illustration_pending",
+  "production_ready": false,
+  "display_name": "Chuddy",
+  "spelling": "CHUDDY",
+  "letter_sequence": ["c", "h", "u", "d", "d", "y"],
+  "groups": ["chu", "dd", "y"],
+  "requested_illustration": "The two d letters formed by Patrick's backside, with Patrick looking backward with a stupid face and drool.",
+  "blocker": {
+    "tool": "built-in ImageGen",
+    "result": "rejected as sexual",
+    "source": "docs/ART_GENERATION.md",
+    "attempted_brief": "Fully clothed cartoon rear pose in green floral shorts; recorded as nonsexual in the submitted brief.",
+    "new_attempts_in_this_logo_task": 0
+  },
+  "proof": {
+    "path": "layout-proof.html",
+    "purpose": "Spelling and layout review only; ordinary type marks the pending dd illustration.",
+    "production_asset": false,
+    "reference": "../chuddy/gestures.png",
+    "reference_sha256": "57981ec32b50b6fb70e79d3b327428ced905fac080ca8fcc59a6879bb670521b",
+    "reference_cell": {"x": 0, "y": 0, "width": 418, "height": 627},
+    "reference_use": "Read-only display of the existing front-facing neutral cell; no illustration completion."
+  },
+  "production": {
+    "path": null,
+    "format": "PNG",
+    "color_mode": "RGBA",
+    "master_width": 2048,
+    "master_height": 1024,
+    "planned_filename": "chuddy-logo.png",
+    "planned_url": "/web/assets/logo/chuddy-logo.png",
+    "layout": {"baseline_y": 860, "safe_inset": 64, "chu_x": [64, 800], "dd_x": [800, 1600], "y_x": [1600, 1984]},
+    "integration_policy": "Keep current wordmark while production_ready is false. Do not use the proof as a production logo."
+  }
+}

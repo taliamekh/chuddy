@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrick · Turret calibration</title>
+<style>
+:root { color-scheme: light; font-family: Inter, system-ui, sans-serif; color: #183632; background: #eef5f2; }
+* { box-sizing: border-box; }
+main { max-width: 1040px; margin: auto; padding: 36px 24px 48px; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.045em; margin: 0 0 6px; }
+h2 { font-size: 1.3rem; margin: 0; }
+p { margin: 8px 0 0; line-height: 1.5; }
+.muted, small { color: #536963; }
+.card { background: #fff; border: 1px solid #c8dad2; border-radius: 17px; padding: 18px; }
+.session { position: sticky; z-index: 2; top: 0; margin: 22px 0 14px; }
+.session-top, .card-top, .buttons, .check-row, .endpoints { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.session-top, .card-top { justify-content: space-between; }
+.session-top h2 { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.badge { display: inline-block; padding: .25rem .55rem; border-radius: .6rem; font-size: .8rem; background: #e1efe8; color: #285347; }
+.stop { background: #a52e36; border-color: #a52e36; color: white; }
+.primary { background: #1d5b4c; border-color: #1d5b4c; color: white; }
+button { min-height: 40px; border: 1px solid #9bb5a9; border-radius: 8px; background: #f6faf8; color: #183632; padding: 8px 12px; font: inherit; font-weight: 650; cursor: pointer; }
+button:disabled { opacity: .48; cursor: default; }
+:focus-visible { outline: 3px solid #226db4; outline-offset: 3px; }
+.check-row { align-items: flex-start; margin-top: 10px; }
+input[type=checkbox] { height: 1.1rem; width: 1.1rem; margin: .13rem .2rem 0 0; }
+.check-row label { flex: 1; }
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.readout { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kicker { font-size: .78rem; color: #536963; }
+.output { font-size: .91rem; background: #eef5f2; border-radius: 8px; padding: 8px 10px; min-height: 36px; }
+.axis .buttons { margin-top: 12px; }
+.endpoints { display: grid; grid-template-columns: 1fr 1fr; margin-top: 14px; }
+.endpoint { border-top: 1px solid #d8e5df; padding-top: 10px; }
+.endpoint p { margin-top: 3px; min-height: 24px; }
+.details { margin-top: 14px; }
+summary { cursor: pointer; font-weight: 650; }
+.fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.fields label { font-size: .83rem; color: #445c54; }
+input[type=number], select { background: white; border: 1px solid #9bb5a9; border-radius: 6px; font: inherit; color: #183632; padding: 7px; min-height: 36px; }
+.fields input { display: block; width: 100%; margin-top: 3px; }
+.tests { margin-top: 14px; }
+.tests .buttons { margin-top: 10px; }
+#error { color: #94262d; }
+@media (max-width: 680px) {
+  main { padding: 18px 12px 32px; }
+  .columns { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Turret calibration</h1>
+  <p class="muted">Teach Patrick’s turn and the lever’s travel, then run a dry bench test.</p>
+  <section class="card session" aria-label="Session controls">
+    <div class="session-top">
+      <h2><span id="mode" class="badge">Connecting</span><span id="state">Outputs off</span></h2>
+      <div class="buttons">
+        <button id="arm" class="primary" data-action="arm" disabled>Arm bench test</button>
+        <button class="stop" data-action="stop">Stop · Esc</button>
+      </div>
+    </div>
+    <div class="check-row">
+      <input id="dry" type="checkbox" autocomplete="off">
+      <label for="dry">Dry setup is clear. The spray bottle is out and the servo power switch is within reach.</label>
+    </div>
+    <p id="status" class="output" role="status">Waiting for local controller…</p>
+    <p id="error" role="alert" hidden></p>
+  </section>
+  <div id="axes" class="columns"></div>
+  <section class="card tests" aria-labelledby="tests-heading">
+    <h2 id="tests-heading">Run a dry test</h2>
+    <p class="muted">Measure the real turn and lever travel at the mechanism. The combined test turns to the taught back position, lowers and lifts the lever once, then returns to front.</p>
+    <div class="buttons">
+      <button data-action="test" data-test="turn" disabled>Test turn</button>
+      <button data-action="test" data-test="lever" disabled>Test lever</button>
+      <button class="primary" data-action="test" data-test="full" disabled>Full dry run</button>
+    </div>
+  </section>
+</main>
+<template id="axis-template">
+  <section class="card axis">
+    <div class="card-top"><h2></h2><span class="badge pin"></span></div>
+    <p class="kicker">LAST COMMAND · µs</p>
+    <div class="readout">—</div>
+    <div class="buttons">
+      <button data-action="start" disabled>Send start pulse</button>
+      <label>Jog step <select aria-label="Jog step in microseconds"><option>5</option><option selected>25</option><option>50</option></select> µs</label>
+    </div>
+    <div class="buttons">
+      <button data-action="jog" data-direction="-1" disabled>− Jog</button>
+      <button data-action="jog" data-direction="1" disabled>+ Jog</button>
+    </div>
+    <div class="endpoints">
+      <div class="endpoint"><button data-action="teach" disabled></button><p class="first muted"></p></div>
+      <div class="endpoint"><button data-action="teach" disabled></button><p class="second muted"></p></div>
+    </div>
+    <details class="details">
+      <summary>Jog limits and start pulse</summary>
+      <div class="fields">
+        <label>Low (µs)<input type="number" name="low" min="500" max="2500" step="1"></label>
+        <label>Start (µs)<input type="number" name="start" min="500" max="2500" step="1"></label>
+        <label>High (µs)<input type="number" name="high" min="500" max="2500" step="1"></label>
+      </div>
+      <div class="buttons">
+        <button data-action="limits" disabled>Save limits</button>
+        <button data-action="clear" disabled>Clear taught endpoints</button>
+      </div>
+    </details>
+  </section>
+</template>
+<script nonce="@@TOKEN@@">
+"use strict";
+const headers = {"Content-Type": "application/json", "X-Calibrator-Token": "@@TOKEN@@"};
+const client = crypto.randomUUID();
+const dry = document.querySelector("#dry");
+const error = document.querySelector("#error");
+const cards = {};
+let status = null;
+let requestNumber = 0;
+let lastResponse = 0;
+let pending = false;
+let polling = false;
+let localStop = false;
+
+for (const [axis, title, pin, first, second] of [
+    ["yaw", "Patrick’s turn", "GPIO12 · Pin 32", "front", "back"],
+    ["lever", "Lever travel", "GPIO13 · Pin 33", "up", "down"],
+]) {
+  const fragment = document.querySelector("#axis-template").content.cloneNode(true);
+  const card = fragment.querySelector(".axis");
+  card.dataset.axis = axis;
+  card.querySelector("h2").textContent = title;
+  card.querySelector(".pin").textContent = pin;
+  [first, second].forEach((mark, index) => {
+    const button = card.querySelectorAll("[data-action=teach]")[index];
+    button.dataset.mark = mark;
+    button.textContent = "Teach " + mark;
+  });
+  cards[axis] = card;
+  document.querySelector("#axes").append(fragment);
+}
+
+function display() {
+  const armed = Boolean(status?.armed);
+  const stepReady = Boolean(status?.mine && !status.busy && !localStop && !pending);
+  document.querySelector("#mode").textContent = status?.mode || "Connecting";
+  document.querySelector("#state").textContent = status?.fault ? "Signal fault" :
+    status?.busy && !localStop ? status.stage : armed && !localStop ? "Armed" : "Outputs off";
+  const statusMessage = status?.stage && status.busy ? status.stage + " · PWM test in progress" : status?.message;
+  const output = document.querySelector("#status");
+  const message = localStop ? "Stopping…" : statusMessage || "Waiting for local controller…";
+  if (output.textContent !== message) output.textContent = message;
+  document.querySelector("#arm").disabled = !status || armed || localStop || !dry.checked || pending || status.fault;
+  const ready = {};
+  for (const [axis, card] of Object.entries(cards)) {
+    const data = status?.axes[axis];
+    if (!data) continue;
+    const current = status.commanded[axis];
+    const span = [data.first, data.second];
+    ready[axis] = span.every(value => value !== null) && Number.isInteger(current) &&
+      current >= Math.min(...span) && current <= Math.max(...span);
+    card.querySelector(".readout").textContent = current ?? "—";
+    for (const mark of ["first", "second"]) {
+      card.querySelector("." + mark).textContent = data[mark] === null ? "Not taught" : data[mark] + " µs";
+    }
+    for (const input of card.querySelectorAll(".fields input")) {
+      if (!input.dataset.loaded) {
+        input.value = data[input.name];
+        input.dataset.loaded = "true";
+      }
+      input.disabled = armed || pending;
+    }
+    card.querySelector("[data-action=start]").disabled = !stepReady;
+    for (const button of card.querySelectorAll("[data-action=jog], [data-action=teach]")) {
+      button.disabled = !stepReady || current === undefined;
+    }
+    for (const button of card.querySelectorAll("[data-action=limits], [data-action=clear]")) {
+      button.disabled = armed || pending;
+    }
+  }
+  for (const button of document.querySelectorAll("[data-action=test]")) {
+    const test = button.dataset.test;
+    button.disabled = !stepReady || !(test === "full" ? ready.yaw && ready.lever : ready[test === "turn" ? "yaw" : "lever"]);
+  }
+}
+
+async function post(action, extra = {}, keepalive = false) {
+  const number = ++requestNumber;
+  const response = await fetch("/api", {
+    method: "POST", headers, keepalive,
+    body: JSON.stringify({client, action, epoch: status?.epoch ?? -1, ...extra}),
+    signal: keepalive ? undefined : AbortSignal.timeout(2000),
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error);
+  // Status requests can overlap command replies. A newer epoch always wins.
+  if (!status || body.epoch > status.epoch || (body.epoch === status.epoch && number >= lastResponse)) {
+    status = body;
+    lastResponse = number;
+    display();
+  }
+}
+
+function showError(text) {
+  error.textContent = text;
+  error.hidden = !text;
+}
+
+async function stop() {
+  if (localStop) return;
+  localStop = true;
+  dry.checked = false;
+  display();
+  try {
+    await post("stop", {}, true);
+    showError("");
+  } catch {
+    showError("Stop request did not reach the Pi. Switch off servo power. Lost presence expires the session.");
+  } finally {
+    localStop = false;
+    display();
+  }
+}
+
+async function poll() {
+  if (polling || pending || localStop || document.hidden || !document.hasFocus()) return;
+  polling = true;
+  try {
+    await post(status?.mine ? "present" : "status");
+  } catch {
+    if (status?.mine) void stop();
+  } finally {
+    polling = false;
+  }
+}
+
+document.addEventListener("click", async event => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+  const action = button.dataset.action;
+  if (action === "stop") {
+    void stop();
+    return;
+  }
+  if (pending || localStop) return;
+  const card = button.closest("[data-axis]");
+  const extra = {};
+  if (card) extra.axis = card.dataset.axis;
+  if (action === "arm") extra.dry = dry.checked;
+  if (action === "test") extra.test = button.dataset.test;
+  if (action === "teach") extra.mark = button.dataset.mark;
+  if (action === "jog") extra.step = Number(button.dataset.direction) * Number(card.querySelector("select").value);
+  if (action === "limits") {
+    for (const input of card.querySelectorAll(".fields input")) extra[input.name] = input.valueAsNumber;
+  }
+  pending = true;
+  showError("");
+  display();
+  try {
+    await post(action, extra);
+    if (action === "limits") {
+      for (const input of card.querySelectorAll(".fields input")) input.value = status.axes[extra.axis][input.name];
+    }
+  } catch (exc) {
+    showError(exc.message);
+  } finally {
+    pending = false;
+    display();
+  }
+});
+dry.addEventListener("change", () => {
+  if (!dry.checked && (status?.mine || pending)) void stop();
+  display();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") void stop();
+});
+function releaseOnLeave() {
+  if (status?.mine || pending) void stop();
+}
+window.addEventListener("blur", releaseOnLeave);
+window.addEventListener("pagehide", releaseOnLeave);
+window.addEventListener("focus", poll);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) releaseOnLeave();
+  else void poll();
+});
+setInterval(poll, 300);
+void post("status").catch(exc => showError(exc.message));
+</script>
+</body>
+</html>

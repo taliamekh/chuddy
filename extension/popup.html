@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chuddy browser sidekick</title><link rel="stylesheet" href="popup.css"><script src="common.js" defer></script><script src="popup.js" defer></script></head><body>
+<header><span>✳</span><div><h1>chuddy.</h1><p>YOUR BROWSER SIDEKICK</p></div></header>
+<div class="status-box"><span id="status-dot"></span><div><b id="status">Checking the desktop…</b><small id="status-detail">Only selected focused tabs are reported.</small></div></div>
+<label class="toggle"><input type="checkbox" id="enabled"><span>Let Chuddy close selected work tabs during a session</span></label>
+
+<details id="pairing"><summary>Pair with the local desktop</summary><form id="pair-form"><label>Desktop address<input type="url" id="base" value="http://127.0.0.1:8765" required></label><label>Browser-only pairing token<input type="password" id="token" autocomplete="off" placeholder="From Work rules → Show pairing setup" required></label><button type="submit">Pair desktop ↗</button></form></details>
+<section><div class="section-title"><h2>Choose what counts as work</h2><button type="button" id="refresh" class="text-button">Refresh ↻</button></div><div id="rules"><span class="note">Not paired</span></div><button type="button" id="save-rules" class="secondary">Save selected rules</button></section>
+
+<button type="button" id="forget" class="text-button">Disconnect and forget pairing</button><div id="message" role="status" aria-live="polite"></div>
+</body></html>

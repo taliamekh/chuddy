@@ -1,0 +1,11 @@
+{
+  "backend": "simulator",
+  "motion": {
+    "yaw_min": 0, "yaw_max": 180, "home": 0, "away": 180,
+    "speed_deg_s": 180, "timeout_s": 8, "calibrated": false
+  },
+  "belly_pin": null,
+  "input_device": null,
+  "output_device": null,
+  "sample_rate": 16000
+}

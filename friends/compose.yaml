@@ -1,0 +1,12 @@
+services:
+  leaderboard:
+    build:
+      context: ..
+      dockerfile: friends/Dockerfile
+    ports:
+      - "127.0.0.1:8770:8770"
+    volumes:
+      - chuddy-friends:/data
+    restart: unless-stopped
+volumes:
+  chuddy-friends:

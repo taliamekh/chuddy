@@ -1,0 +1,16 @@
+[Unit]
+Description=Chuddy local Raspberry Pi companion (disarmed at startup)
+After=network.target
+
+[Service]
+Type=simple
+# Adjust installation/user/address before use; no real GPIO defaults are supplied.
+WorkingDirectory=/opt/chuddy
+EnvironmentFile=/opt/chuddy/pi/service.env
+ExecStart=/opt/chuddy/.venv/bin/python -m pi.service --config /opt/chuddy/pi/config.local.json --data-dir /opt/chuddy/data/pi --host 127.0.0.1
+Restart=on-failure
+RestartSec=3
+User=chuddy
+
+[Install]
+WantedBy=multi-user.target

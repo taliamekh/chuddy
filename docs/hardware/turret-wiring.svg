@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1050" viewBox="0 0 1200 1050" role="img" aria-labelledby="title desc">
+<title id="title">Patrick’s turn-only turret wiring</title>
+<desc id="desc">Anker USB-C powers the Pi. GPIO12 pin 32 signals the yaw servo and GPIO13 pin 33 signals the lever servo. The servo power supply provides all motor positive and return current. The Pi ground pin 39 connects to the servo return. The lower view shows Patrick upright on the turning plate and the bottle and former tilt servo fixed to a separate bracket beside it.</desc>
+<defs>
+  <marker id="arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M1 1 8 4 1 7Z" fill="#3b6257"/></marker>
+  <style>
+    text {font-family:"Segoe UI",sans-serif;fill:#183632}
+    .heading {font-weight:700;font-size:32px}
+    .label {font-weight:650;font-size:25px}
+    .plate {fill:#f1f7f4;stroke:#bbd2c7;stroke-width:2}
+    .panel {fill:#fff;stroke:#ccddd5;stroke-width:2}
+    .note {font-size:22px;fill:#466058}
+    .small {font-size:20px;fill:#466058}
+    .signal {fill:none;stroke:#1461b6;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+    .positive {fill:none;stroke:#af3e21;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+    .ground {fill:none;stroke:#374450;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+    .leader {fill:none;stroke:#64877a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  </style>
+</defs>
+<rect width="1200" height="1050" fill="#edf5f1"/>
+<rect x="40" y="31" width="52" height="7" rx="3.5" fill="#37786a"/>
+<text x="40" y="92" font-size="53" font-weight="730">Patrick’s turn-only turret</text>
+<text class="note" x="42" y="132">Yaw assembly · stationary lever and bottle</text>
+
+<g id="power-and-signals">
+  <rect class="panel" x="40" y="156" width="1120" height="474" rx="22"/>
+  <text class="heading" x="65" y="205">Power the Pi and servos separately</text>
+  <rect class="plate" x="65" y="227" width="268" height="54" rx="9"/>
+  <text x="199" y="261" text-anchor="middle" font-size="22" font-weight="650">Anker USB-C · 5 V</text>
+  <path d="M199 285 V311" class="leader" marker-end="url(#arrow)"/>
+  <rect x="65" y="320" width="268" height="180" rx="14" fill="#e4f0e9" stroke="#88b4a2" stroke-width="2"/>
+  <text class="label" x="83" y="351">Raspberry Pi 5</text>
+  <text class="small" x="83" y="390">GPIO12 · pin 32</text>
+  <text class="small" x="83" y="438">GPIO13 · pin 33</text>
+  <text class="small" x="83" y="478">GND · pin 39</text>
+  <path class="signal" d="M333 383 H433 V317 H523"/>
+  <path class="signal" d="M333 431 H523"/>
+  <path class="ground" d="M333 471 H377 V534 H866 V372 H921"/>
+  <text class="small" x="353" y="295">50 Hz PWM</text>
+
+  <rect class="plate" x="523" y="269" width="237" height="90" rx="12"/>
+  <text class="label" x="541" y="302">Turn servo</text>
+  <text class="small" x="541" y="332">Original yaw stage</text>
+  <rect class="plate" x="523" y="387" width="237" height="90" rx="12"/>
+  <text class="label" x="541" y="420">Lever servo</text>
+  <text class="small" x="541" y="450">Former tilt motor</text>
+
+  <path class="positive" d="M760 287 H805 V405 H760 M805 320 H921"/>
+  <path d="M760 342 H866 M760 459 H866" fill="none" stroke="#fff" stroke-width="14"/>
+  <path class="ground" d="M760 342 H866 V459 H760"/>
+  <circle cx="805" cy="320" r="7" fill="#af3e21"/>
+  <circle cx="866" cy="372" r="7" fill="#374450"/>
+  <circle cx="866" cy="459" r="7" fill="#374450"/>
+  <path d="M866 459 V534" class="ground"/>
+  <rect x="921" y="275" width="215" height="145" rx="13" fill="#fff5eb" stroke="#d5a68c" stroke-width="2"/>
+  <text x="940" y="303" class="small">Regulated supply</text>
+  <text x="940" y="333" font-size="24" font-weight="650" style="fill:#98391e">+ Motor rail</text>
+  <text x="940" y="380" font-size="24" font-weight="650">− Return</text>
+  <text class="small" x="920" y="449">Switch motor power</text>
+  <text class="small" x="920" y="477">off here if it jams.</text>
+  <text class="small" x="508" y="523">One ground reference to Pi</text>
+
+  <path d="M65 555 H1134" stroke="#dfebe4" stroke-width="2"/>
+  <text class="small" x="65" y="585">Cheek switch · GPIO17 (pin 11) to GND (pin 9) with internal pull-up.</text>
+  <text class="small" x="1134" y="588" text-anchor="end">Leave Pi 5 V and 3.3 V pins unwired.</text>
+</g>
+
+<g id="stationary-lever">
+  <rect class="panel" x="40" y="647" width="1120" height="362" rx="22"/>
+  <text class="heading" x="65" y="695">Keep the lever and bottle off the turntable</text>
+  <text class="note" x="65" y="730">Side-view concept · final height and travel come from the real turret and pump</text>
+
+  <rect x="72" y="936" width="1053" height="24" rx="6" fill="#d8e6df" stroke="#98b8a9" stroke-width="2"/>
+  <g id="turning-stage">
+    <rect x="200" y="870" width="260" height="64" rx="7" fill="#d4e5dd" stroke="#94b0a4" stroke-width="2"/>
+    <rect x="185" y="859" width="289" height="14" rx="5" fill="#71a992"/>
+    <path d="M308 782 Q326 752 341 777 L359 800 392 814 Q407 823 392 829 L363 823 Q370 840 358 857 H302 Q287 845 296 825 L267 830 Q254 824 268 815 L296 800Z" fill="#f4c4cf" stroke="#a75a70" stroke-width="2"/>
+    <path d="M298 834 H364 L360 851 H300Z" fill="#e0e6a9"/>
+    <path d="M208 828 Q199 793 226 775" class="leader" marker-end="url(#arrow)"/>
+    <text class="small" x="72" y="811">Patrick turns</text>
+    <text class="small" x="72" y="837">up to 180°</text>
+    <text class="label" x="330" y="910" text-anchor="middle">Original yaw base</text>
+  </g>
+  <path d="M493 752 V933" stroke="#9bb9ab" stroke-width="2" stroke-dasharray="6 6"/>
+  <path d="M651 839 V935 H696 V839" fill="#b4cec1" stroke="#87a89a" stroke-width="2"/>
+  <rect x="628" y="788" width="88" height="60" rx="7" fill="#bbc9d0" stroke="#758a94" stroke-width="2"/>
+  <circle cx="699" cy="811" r="10" fill="#536670"/>
+  <path d="M699 811 L896 817" stroke="#ae792d" stroke-width="12" stroke-linecap="round"/>
+  <rect x="880" y="818" width="29" height="9" rx="4" fill="#c29a64"/>
+  <path d="M896 832 V847" class="leader" marker-end="url(#arrow)"/>
+  <rect x="883" y="852" width="29" height="17" rx="3" fill="#687f86"/>
+  <rect x="867" y="869" width="62" height="60" rx="12" fill="#e9dce5" stroke="#a9809d" stroke-width="2"/>
+  <path d="M845 909 V936 H957 V909" fill="none" stroke="#8f7e8c" stroke-width="4"/>
+  <path d="M628 814 H565" class="leader"/>
+  <text class="small" x="520" y="775">Tilt motor on</text><text class="small" x="520" y="800">fixed holder</text>
+  <path d="M783 805 V775 H816" class="leader"/>
+  <text class="small" x="827" y="780">Short arm and padded tip</text>
+  <path d="M927 895 H964" class="leader"/>
+  <text class="small" x="973" y="888">Upright bottle</text><text class="small" x="973" y="912">in fixed tray</text>
+  <text class="small" x="600" y="991" text-anchor="middle">Stationary base or board under both assemblies</text>
+</g>
+</svg>

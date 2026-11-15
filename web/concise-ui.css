@@ -1,0 +1,98 @@
+/* Presentation-only cleanup. Keep live errors, provenance, amounts and controls. */
+#game-welcome > span:last-child,
+.casino-intro > p,
+.casino-intro > .casino-kicker,
+.casino-host-bubble > b,
+.casino-host-bubble > span,
+.casino-side-note,
+.casino-cabinet-sign small,
+.casino-machine-meta,
+.casino-machine-base,
+.casino-wallet > small,
+.casino-paytable > p,
+.casino-footer > p,
+.casino-footer > span,
+.casino-seat-placard > small,
+.casino-table-outcome > small,
+[data-dealer-line],
+[data-earned-detail] {
+  display: none !important;
+}
+
+.chat-heading > div > h2 { margin-bottom: 0; }
+.page-heading h1 { margin-top: 0; }
+.summary-card b { margin-bottom: 0; }
+.summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 660px) {
+  .summary-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.leaderboard-periods { display: flex; gap: 8px; flex-wrap: wrap; }
+.leaderboard-periods [aria-pressed="true"] { background: #c8a6dc; border-color: #9c74ba; }
+.calendar-connect-form + .calendar-connect-form { border-top: 1px solid #e8ddd5; margin-top: 24px; padding-top: 20px; }
+.rule-overrides > summary { cursor: pointer; font-size: 20px; font-weight: 600; }
+.rule-overrides[open] > summary { margin-bottom: 20px; }
+.admin-console { position: fixed; top: 12px; left: 12px; z-index: 10000; max-width: calc(100vw - 24px); padding: 12px; background: #172b34; color: #fff3c4; border: 2px solid #8ccbad; border-radius: 12px; box-shadow: 0 8px 30px #0005; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.admin-console[hidden] { display: none; }
+.admin-console input { width: 230px; max-width: 70vw; background: #0c1e26; color: #fff3c4; border-color: #648980; font-family: monospace; }
+.admin-console [role="status"] { width: 100%; font-size: 13px; }
+
+/* Reserve space for the profile; only navigation scrolls in short windows. */
+.sidebar {
+  max-height: 100dvh;
+  padding-bottom: 12px;
+  overflow: hidden;
+}
+.sidebar .brand { flex-shrink: 0; margin-bottom: 24px; }
+.sidebar nav {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+.sidebar nav .nav-item { flex-shrink: 0; }
+.sidebar-bottom { flex-shrink: 0; padding-top: 16px; }
+.sidebar .friend-note { display: none; }
+.local-status > div,
+.profile-button > span:nth-child(2) { min-width: 0; }
+.profile-button b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-button .avatar { flex-shrink: 0; }
+
+@media (max-width: 820px) {
+  .sidebar nav { margin-top: 0; }
+  .sidebar-bottom { display: block; width: 100%; padding-top: 12px; }
+  .local-status { justify-content: center; padding: 0 0 12px; }
+  .local-status > div,
+  .profile-button > span:last-child { display: none; }
+  .profile-button { justify-content: center; padding: 12px 0; }
+  /* Keep the profile name accessible when only the avatar fits. */
+  .profile-button > span:nth-child(2) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Keep the everyday views focused on the companion and the user's content. */
+.topbar > .breadcrumb,
+.character-card .card-top > .pill,
+.character-caption,
+.character-footer,
+.chat-heading #chat-provenance,
+.message-source,
+.chat-output-status #voice-state {
+  display: none !important;
+}
+.topbar,
+.character-card .card-top { justify-content: flex-end; }
+.chat-footnote { justify-content: flex-end; }
+.chat-footnote .chat-output-status:has(#mic-state[hidden]) { display: none; }
+#page-settings > .trace-card { margin: 0 0 20px; }
+
+/* The casino uses the full content viewport, including the former session bar. */
+.workspace:has(#page-casino:not([hidden])) > .topbar { display: none; }
+body:has(#page-casino:not([hidden])) .chud-cursor { display: none; }
+main:has(#page-casino:not([hidden])) { padding: 0; }
+#page-casino > .casino-fit { border-radius: 0; }

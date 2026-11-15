@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.chuddy/
+data/
+*.log
+dist/
+build/
+test-results/
+pi/config.local.json
+pi/service.env

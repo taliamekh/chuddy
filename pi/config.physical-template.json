@@ -1,0 +1,23 @@
+{
+  "backend": "pca9685",
+  "motion": {
+    "yaw_min": null, "yaw_max": null, "home": null, "away": null,
+    "speed_deg_s": null, "timeout_s": null, "calibrated": false
+  },
+  "pca9685": {
+    "address": null, "yaw_channel": null, "min_pulse_us": null, "max_pulse_us": null
+  },
+  "gpio": {
+    "yaw_pin": null, "min_pulse_us": null, "max_pulse_us": null
+  },
+  "spray": {
+    "calibrated": false, "pin": null, "channel": null,
+    "pressed": null, "released": null, "min_pulse_us": null, "max_pulse_us": null
+  },
+  "belly_pin": null,
+  "belly_pull_up": true,
+  "input_device": null,
+  "output_device": null,
+  "speech_voice": "en",
+  "sample_rate": 16000
+}
