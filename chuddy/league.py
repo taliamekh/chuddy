@@ -146,10 +146,24 @@ class LeagueLaunch:
 
     def confirm(self, live, stop, lock, exposed, report, *, input_at_close=None):
         """Scope activation to the verified handoff and measure the landing client."""
+        placements = {}
+        try:
+            return self._confirm(live, stop, lock, exposed, report, placements,
+                                 input_at_close=input_at_close)
+        finally:
+            with lock:
+                for window in placements.values():
+                    if '_fullscreen_original_frame' in window:
+                        layout = self.desktop.application_client_area(window)
+                        if not live() or not layout or not layout['coverage']:
+                            self.desktop.restore_application_frame(window)
+
+    def _confirm(self, live, stop, lock, exposed, report, placements, *, input_at_close):
         now = self.clock()
         deadline, settle_until = now + self.startup_timeout, now + FOCUS_SETTLE_SECONDS
         pending_focus, focus_since, missing_since = None, None, None
-        attempts, layouts = set(), {}
+        focus_yielded = False
+        attempts, layouts, resized = set(), {}, set()
         while live():
             candidates = self.windows()
             roles = {windows.window_key(window): role for role, window in candidates}
@@ -171,13 +185,17 @@ class LeagueLaunch:
                 can_activate = not handle or role_at_focus is not None or (focus is not None and focus == exposed)
                 if not can_activate:
                     if input_at_close is None or self.desktop.last_input_tick() != input_at_close:
-                        report(None, False, None, None)
-                        raise RuntimeError("Focus moved away during the League handoff.")
+                        # Mouse movement, typing and a deliberate app switch all
+                        # update this generic marker. It revokes permission to
+                        # activate an unrelated foreground, not the launch that
+                        # has already been dispatched. Keep observing so a slow
+                        # Riot/League startup can take foreground itself.
+                        focus_yielded = True
                     # Close acknowledgment can precede the OS selecting the
                     # stable revealed window. Give it a bounded chance to
                     # settle without new input. A later unrelated window may
                     # be observed, but cannot authorize an activation.
-                    if now <= settle_until and focus is not None:
+                    if not focus_yielded and now <= settle_until and focus is not None:
                         if focus != pending_focus:
                             pending_focus, focus_since = focus, now
                         elif now - focus_since >= WINDOW_STABLE_SECONDS:
@@ -204,19 +222,28 @@ class LeagueLaunch:
                 if window:
                     key = windows.window_key(window)
                     focused = focus == key
-                    layout = (self.desktop.application_client_area(window)
-                              if role == "league_client" else None)
+                    layout = self.desktop.application_client_area(window)
                     covers = layout['coverage'] if layout is not None else None
                     sizing, layout_deadline = layouts.get(key, (None, None))
                     report(role, focused, covers, sizing)
-                    if focused and role == "league_client" and layout is not None:
+                    if focused and layout is not None:
                         if covers:
-                            if self.desktop.foreground_handle() == key[0] and self.desktop.window_owner(key[0]) == key[1:]:
+                            if (role == "league_client" and self.desktop.foreground_handle() == key[0]
+                                    and self.desktop.window_owner(key[0]) == key[1:]):
                                 return window
                         elif layout_deadline is None:
-                            sizing = self.desktop.fill_application_monitor(window)
+                            placement = placements.setdefault(key, dict(window))
+                            sizing = self.desktop.fill_application_monitor(placement)
+                            if sizing is not None:
+                                layouts[key] = sizing, self.clock() + self.layout_timeout
+                        elif sizing == "borderless" and key not in resized:
+                            # Electron may finish its non-client frame update
+                            # after the first asynchronous placement. Correct
+                            # the measured client once after that update.
+                            resized.add(key)
+                            sizing = self.desktop.fill_application_monitor(placements[key])
                             layouts[key] = sizing, self.clock() + self.layout_timeout
-                        elif self.clock() >= layout_deadline:
+                        elif role == "league_client" and self.clock() >= layout_deadline:
                             report(role, True, False, sizing)
                             raise RuntimeError("League is in front, but its landing window does not cover the monitor.")
                     elif not focused and can_activate and (focus, key) not in attempts:
@@ -224,9 +251,12 @@ class LeagueLaunch:
                         attempts.add((focus, key))
                 if self.clock() >= deadline:
                     if role_at_focus == "riot_client":
-                        report("riot_client", any(role == "riot_client" and windows.window_key(window) == focus
-                                                  for role, window in candidates), None, None)
+                        if role != "riot_client":
+                            report("riot_client", any(candidate_role == "riot_client" and windows.window_key(candidate) == focus
+                                                       for candidate_role, candidate in candidates), None, None)
                         raise RuntimeError("Riot Client opened. League may be waiting for sign-in or an update.")
+                    if focus_yielded and not can_activate:
+                        raise RuntimeError("Focus moved away during the League handoff.")
                     if role == "league_client":
                         raise RuntimeError("Windows did not confirm the League landing window in front.")
                     raise RuntimeError("Riot did not surface the League landing window.")

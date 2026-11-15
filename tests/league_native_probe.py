@@ -185,11 +185,27 @@ def layout_check(name=None):
             api("CloseDesktop", w.BOOL, w.HANDLE)(desktop)
 
     require_isolated(name)
-    root, handle, _ = fixture_window(landing=True)
+    for frame_kind in ("borderless", "caption", "caption_no_maximize", "fixed_caption"):
+        _layout_case(frame_kind)
+
+
+def _layout_case(frame_kind):
+    from chuddy import windows
+
+    root, handle, _ = fixture_window(landing=frame_kind == "borderless")
+    if frame_kind == "fixed_caption":
+        root.resizable(False, False)
+        root.update()
+        handle = windows._user32().GetAncestor(root.winfo_id(), 2)
+    if frame_kind == "caption_no_maximize":
+        native = windows._user32()
+        native.SetWindowLongW(handle, -16, native.GetWindowLongW(handle, -16) & ~0x00010000)
+        native.SetWindowPos(handle, None, 0, 0, 0, 0, 0x37)
     try:
         owner = windows.window_owner(handle)
         assert owner[0] == os.getpid()
-        exact = {"handle": handle, "pid": owner[0], "thread_id": owner[1]}
+        exact = {"handle": handle, "pid": owner[0], "thread_id": owner[1], "executable_path": sys.executable}
+        shell_activation = windows._shell_activate_application(exact, lambda: True)
         initial = windows.application_client_area(exact)
         assert initial and not initial["coverage"]
         native = windows._user32()
@@ -203,11 +219,16 @@ def layout_check(name=None):
                 return getattr(native, key)
 
         with patch.object(windows, "_user32", return_value=PlacementOnly()):
-            assert windows.fill_application_monitor(exact) == "resize"
+            assert windows.fill_application_monitor(exact) == ("resize" if frame_kind == "borderless" else "borderless")
         root.update()
         settled = windows.application_client_area(exact)
-        assert settled and settled["coverage"]
-        print(json.dumps({"win32_client_before": initial, "win32_client_after": settled,
+        assert settled and settled["coverage"] == (frame_kind != "fixed_caption"), (frame_kind, initial, settled)
+        if frame_kind == "fixed_caption":
+            with patch.object(windows, "_user32", return_value=PlacementOnly()):
+                windows.restore_application_frame(exact)
+            root.update()
+            assert native.GetWindowLongW(handle, -16) & 0x00C00000 == 0x00C00000
+        print(json.dumps({"frame_kind": frame_kind, "shell_activation_return": shell_activation, "win32_client_before": initial, "win32_client_after": settled,
                           "actual_foreground": windows.foreground_handle() == handle,
                           "test_substituted_foreground_gate": True}), flush=True)
     finally:

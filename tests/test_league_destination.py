@@ -64,6 +64,7 @@ class LeagueLauncherTests(unittest.TestCase):
         user = Mock()
         user.GetForegroundWindow.return_value = 1
         user.IsIconic.return_value = True
+        user.SetForegroundWindow.side_effect = lambda handle: (setattr(user.GetForegroundWindow, 'return_value', handle) or True)
         with patch.object(windows, "_user32", return_value=user), patch.object(
                 windows, "_window_owner", side_effect=lambda _, handle: (handle + 10, handle + 20)), patch.object(
                 windows, "_transient", return_value=False):
@@ -81,6 +82,53 @@ class LeagueLauncherTests(unittest.TestCase):
                            "Riot Client.exe", "League of Legends.exe"):
             result = evaluate({"handle": 1, "pid": 2, "process": executable, "title": "Report"}, [])
             self.assertEqual(result["reason"], "excluded_gaming")
+
+    def test_declined_win32_activation_uses_guarded_application_activation(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        user = Mock()
+        user.GetForegroundWindow.return_value = 1
+        user.IsIconic.return_value = False
+        user.SetForegroundWindow.return_value = False
+        with patch.object(windows, "_user32", return_value=user), patch.object(
+                windows, "_window_owner", side_effect=lambda _, handle: (handle + 10, handle + 20)), patch.object(
+                windows, "_transient", return_value=False), patch.object(
+                windows, "_shell_activate_application", side_effect=lambda _window, guard: guard()) as shell:
+            self.assertTrue(windows.activate_application(frame, (1, 11, 21)))
+            shell.assert_called_once()
+            self.assertEqual(shell.call_args.args[0], frame)
+            user.GetForegroundWindow.return_value = 8
+            self.assertFalse(windows.activate_application(frame, (1, 11, 21)))
+            shell.assert_called_once()
+
+    def test_accepted_win32_request_without_actual_focus_uses_fallback(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        user = Mock()
+        user.GetForegroundWindow.return_value = 1
+        user.IsIconic.return_value = False
+        user.SetForegroundWindow.return_value = True
+        with patch.object(windows, "_user32", return_value=user), patch.object(
+                windows, "_window_owner", side_effect=lambda _, handle: (handle + 10, handle + 20)), patch.object(
+                windows, "_transient", return_value=False), patch.object(
+                windows, "_shell_activate_application", side_effect=lambda _window, guard: guard()) as shell:
+            self.assertTrue(windows.activate_application(frame, (1, 11, 21)))
+            shell.assert_called_once()
+
+    def test_focus_change_after_declined_activation_cannot_authorize_fallback(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        user = Mock()
+        user.GetForegroundWindow.return_value = 1
+        user.IsIconic.return_value = False
+
+        def decline(_):
+            user.GetForegroundWindow.return_value = 8
+            return False
+
+        user.SetForegroundWindow.side_effect = decline
+        with patch.object(windows, "_user32", return_value=user), patch.object(
+                windows, "_window_owner", side_effect=lambda _, handle: (handle + 10, handle + 20)), patch.object(
+                windows, "_transient", return_value=False), patch.object(
+                windows, "_shell_activate_application", side_effect=lambda _window, guard: guard()):
+            self.assertFalse(windows.activate_application(frame, (1, 11, 21)))
 
     def stage(self, frame, *, initially_focused=False, allow_focus=True, resize=True):
         self.desktop.application_windows.return_value = [frame]
@@ -127,6 +175,28 @@ class LeagueLauncherTests(unittest.TestCase):
         self.desktop.fill_application_monitor.assert_called_once_with(frame)
         self.report.assert_called_with("league_client", True, True, "resize")
 
+    def test_async_borderless_frame_gets_one_measured_client_correction(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        self.stage(frame, initially_focused=True)
+        full = False
+        def place(_):
+            nonlocal full
+            full = self.desktop.fill_application_monitor.call_count == 2
+            return "resize" if full else "borderless"
+        self.desktop.fill_application_monitor.side_effect = place
+        self.desktop.application_client_area.side_effect = lambda _: {"coverage": full}
+        self.assertEqual(self.confirm(), frame)
+        self.assertEqual(self.desktop.fill_application_monitor.call_count, 2)
+
+    def test_focus_raced_sizing_does_not_consume_the_layout_attempt(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        self.stage(frame, initially_focused=True)
+        self.desktop.fill_application_monitor.side_effect = [None, "resize"]
+        self.desktop.application_client_area.side_effect = lambda _: {
+            "coverage": self.desktop.fill_application_monitor.call_count == 2}
+        self.assertEqual(self.confirm(), frame)
+        self.assertEqual(self.desktop.fill_application_monitor.call_count, 2)
+
     def test_windowed_landing_stays_open_with_honest_geometry_failure(self):
         frame = self.window("LeagueClientUx.exe", "League of Legends")
         self.stage(frame, resize=False)
@@ -139,7 +209,8 @@ class LeagueLauncherTests(unittest.TestCase):
         self.stage(riot)
         with self.assertRaisesRegex(RuntimeError, "sign-in or an update"):
             self.confirm()
-        self.desktop.fill_application_monitor.assert_not_called()
+        self.desktop.fill_application_monitor.assert_called_once_with(riot)
+        self.desktop.reset_mock()
         league = self.window("LeagueClientUx.exe", "League of Legends")
         self.stage(league, allow_focus=False)
         with self.assertRaisesRegex(RuntimeError, "landing window in front"):
@@ -204,6 +275,66 @@ class LeagueLauncherTests(unittest.TestCase):
         self.assertEqual(self.confirm(input_at_close=10), frame)
         self.desktop.activate_application.assert_called_once_with(frame, (8, 18, 28))
         self.report.assert_called_with("league_client", True, True, "resize")
+
+    def test_new_input_during_cold_start_does_not_discard_later_league_foreground(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        self.stage(frame)
+        now = 0
+        self.launch.clock = lambda: now
+        self.desktop.last_input_tick.return_value = 11
+        self.desktop.application_windows.side_effect = lambda _: [] if now < 2 else [frame]
+        self.desktop.foreground_handle.side_effect = lambda: 8 if now < 2 else 2
+        self.desktop.window_owner.side_effect = {8: (18, 28), 2: (12, 22)}.get
+
+        def wait(_):
+            nonlocal now
+            now += 1
+
+        self.stop.wait.side_effect = wait
+        self.assertEqual(self.confirm(input_at_close=10), frame)
+        self.desktop.activate_application.assert_not_called()
+        self.desktop.fill_application_monitor.assert_called_once_with(frame)
+        self.report.assert_called_with("league_client", True, True, "resize")
+
+    def test_stop_during_passive_startup_prevents_a_late_layout(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        self.stage(frame)
+        cancelled = threading.Event()
+        self.desktop.last_input_tick.return_value = 11
+        self.desktop.foreground_handle.side_effect = lambda: 8 if not cancelled.is_set() else 2
+        self.desktop.window_owner.side_effect = {8: (18, 28), 2: (12, 22)}.get
+        self.stop.wait.side_effect = lambda _: cancelled.set()
+        self.assertIsNone(self.confirm(lambda: not cancelled.is_set(), input_at_close=10))
+        self.desktop.activate_application.assert_not_called()
+        self.desktop.fill_application_monitor.assert_not_called()
+
+    def test_cancelled_borderless_request_restores_the_original_frame(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        self.stage(frame, initially_focused=True)
+        cancelled = threading.Event()
+
+        def change_frame(window):
+            window['_fullscreen_original_frame'] = (0x00C00000, (0, 0, 600, 400))
+            return 'borderless'
+
+        self.desktop.fill_application_monitor.side_effect = change_frame
+        self.stop.wait.side_effect = lambda _: cancelled.set()
+        self.assertIsNone(self.confirm(lambda: not cancelled.is_set()))
+        self.desktop.restore_application_frame.assert_called_once()
+        restored = self.desktop.restore_application_frame.call_args.args[0]
+        self.assertEqual(windows.window_key(restored), windows.window_key(frame))
+
+    def test_new_input_yields_without_focusing_a_background_league_client(self):
+        frame = self.window("LeagueClientUx.exe", "League of Legends")
+        self.stage(frame)
+        self.desktop.foreground_handle.side_effect = lambda: 8
+        self.desktop.window_owner.side_effect = {8: (18, 28), 2: (12, 22)}.get
+        self.desktop.last_input_tick.return_value = 11
+        with self.assertRaisesRegex(RuntimeError, "Focus moved away"):
+            self.confirm(input_at_close=10)
+        self.assertGreaterEqual(self.stop.wait.call_count, self.launch.startup_timeout)
+        self.desktop.activate_application.assert_not_called()
+        self.desktop.fill_application_monitor.assert_not_called()
 
     def test_late_unrelated_focus_is_passive_until_league_itself_comes_forward(self):
         frame = self.window("LeagueClientUx.exe", "League of Legends")

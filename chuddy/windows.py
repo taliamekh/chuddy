@@ -29,6 +29,7 @@ def _user32():
         "GetClientRect": (w.BOOL, [w.HWND, c.POINTER(w.RECT)]),
         "ClientToScreen": (w.BOOL, [w.HWND, c.POINTER(w.POINT)]),
         "GetWindowLongW": (w.LONG, [w.HWND, c.c_int]),
+        "SetWindowLongW": (w.LONG, [w.HWND, c.c_int, w.LONG]),
         "ShowWindowAsync": (w.BOOL, [w.HWND, c.c_int]),
         "SetWindowPos": (w.BOOL, [w.HWND, w.HWND, c.c_int, c.c_int, c.c_int, c.c_int, w.UINT]),
     }
@@ -306,12 +307,69 @@ def activate_application(window, expected_focus):
         return False
     if user.IsIconic(handle):
         user.ShowWindowAsync(handle, 9)  # SW_RESTORE
-    return bool(focus_is_current() and _window_owner(user, handle) == tuple(owner)
-                and user.SetForegroundWindow(handle))
+    if not focus_is_current() or _window_owner(user, handle) != tuple(owner):
+        return False
+    user.SetForegroundWindow(handle)
+    if user.GetForegroundWindow() == handle and _window_owner(user, handle) == tuple(owner):
+        return True
+    return _shell_activate_application(window, focus_is_current)
+
+
+def _shell_activate_application(window, focus_is_current):
+    """Use Windows' application activation service after a declined Win32 ask.
+
+    This is a synchronous PID-scoped request, not a queued helper or key
+    injection. The caller holds its cancellation lock across the final guard
+    and effect. Actual foreground is still measured by the handoff afterwards.
+    """
+    import ctypes as c
+
+    ole = c.WinDLL('ole32')
+    ole.CoInitializeEx.argtypes, ole.CoInitializeEx.restype = [c.c_void_p, c.c_uint], c.c_long
+    ole.CoUninitialize.argtypes, ole.CoUninitialize.restype = [], None
+    initialized = ole.CoInitializeEx(None, 0)
+    if initialized not in (0, 1, -2147417850):  # existing STA apartment is also usable
+        return False
+    shell = None
+    try:
+        import clr  # Existing pywebview/pythonnet dependency; no new runtime.
+        from System import Activator, Array, Int32, Object, Type
+        from System.Reflection import BindingFlags
+        from System.Runtime.InteropServices import Marshal
+
+        shell_type = Type.GetTypeFromProgID('WScript.Shell')
+        if shell_type is None:
+            return False
+        shell = Activator.CreateInstance(shell_type)
+        user = _user32()
+        handle, *owner = window_key(window)
+        path = window.get('executable_path')
+        if not path:
+            return False
+        candidates = [item for item in application_windows([path]) if item['pid'] == owner[0]]
+        if len(candidates) != 1 or window_key(candidates[0]) != window_key(window):
+            return False
+        if (not focus_is_current() or _window_owner(user, handle) != tuple(owner)
+                or _transient(user, handle) or user.GetLastActivePopup(handle) != handle):
+            return False
+        return bool(shell_type.InvokeMember('AppActivate', BindingFlags.InvokeMethod,
+                                            None, shell, Array[Object]([Int32(owner[0])])))
+    except Exception:
+        return False
+    finally:
+        try:
+            if shell is not None:
+                Marshal.FinalReleaseComObject(shell)
+        finally:
+            if initialized in (0, 1):
+                ole.CoUninitialize()
 
 
 def fill_application_monitor(window):
-    """Request normal window sizing on a verified, already focused client."""
+    """Place a verified focused client across the monitor, including DPI/borders."""
+    import ctypes as c
+    from ctypes import wintypes as w
+
     user = _user32()
     handle, *owner = window_key(window)
     with _monitor_coordinates(user):
@@ -319,19 +377,70 @@ def fill_application_monitor(window):
         if (screen is None or user.GetForegroundWindow() != handle
                 or _window_owner(user, handle) != tuple(owner) or _transient(user, handle)):
             return None
-        style = user.GetWindowLongW(handle, -16)  # GWL_STYLE
-        if style & 0x00C00000 == 0x00C00000:  # WS_CAPTION
-            if style & 0x00010000:  # WS_MAXIMIZEBOX
-                user.ShowWindowAsync(handle, 3)  # SW_MAXIMIZE
-                return 'maximize'
-            return 'fixed'
+        style = user.GetWindowLongW(handle, -16)
+        frame = style & 0x00C40000  # WS_CAPTION | WS_THICKFRAME
+        if frame:
+            # Enter borderless fullscreen without changing global display
+            # settings or making the window topmost. Keep app/system controls.
+            c.set_last_error(0)
+            original_rect = w.RECT()
+            if not user.GetWindowRect(handle, c.byref(original_rect)):
+                return 'rejected'
+            previous = user.SetWindowLongW(handle, -16, style & ~0x00C40000)
+            if not previous and c.get_last_error():
+                return 'rejected'
+            if (user.GetForegroundWindow() != handle or _window_owner(user, handle) != tuple(owner)):
+                if _window_owner(user, handle) == tuple(owner):
+                    user.SetWindowLongW(handle, -16, style)
+                    user.SetWindowPos(handle, None, 0, 0, 0, 0, 0x4237)
+                return None
+            if user.SetWindowPos(handle, None, screen.left, screen.top,
+                                 screen.right - screen.left, screen.bottom - screen.top,
+                                 0x4234):  # ASYNC | NOOWNERZORDER | NOACTIVATE | NOZORDER | FRAMECHANGED
+                window.setdefault('_fullscreen_original_frame', (style, (original_rect.left, original_rect.top,
+                                                                         original_rect.right, original_rect.bottom)))
+                return 'borderless'
+            user.SetWindowLongW(handle, -16, style)
+            user.SetWindowPos(handle, None, 0, 0, 0, 0, 0x4237)
+            return 'rejected'
+        outer, client = w.RECT(), w.RECT()
+        if not user.GetWindowRect(handle, c.byref(outer)) or not user.GetClientRect(handle, c.byref(client)):
+            return 'rejected'
+        start, end = w.POINT(client.left, client.top), w.POINT(client.right, client.bottom)
+        if not all(user.ClientToScreen(handle, c.byref(point)) for point in (start, end)):
+            return 'rejected'
+        # A normal maximize only fills the work area and leaves the taskbar.
+        # A caption without a maximize button does not prohibit SetWindowPos.
+        # Account for non-client borders in the same physical DPI context as
+        # the monitor, so the *client* covers it rather than stopping short.
+        left, top = start.x - outer.left, start.y - outer.top
+        right, bottom = outer.right - end.x, outer.bottom - end.y
         # Keep the window's own style, z-order and focus. Its WM_SIZE handlers
         # can constrain the request, so later measurement remains authoritative.
-        if user.SetWindowPos(handle, None, screen.left, screen.top,
-                             screen.right - screen.left, screen.bottom - screen.top,
+        if (user.GetForegroundWindow() != handle or _window_owner(user, handle) != tuple(owner)):
+            return None
+        if user.SetWindowPos(handle, None, screen.left - left, screen.top - top,
+                             screen.right - screen.left + left + right,
+                             screen.bottom - screen.top + top + bottom,
                              0x4214):  # ASYNCWINDOWPOS | NOOWNERZORDER | NOACTIVATE | NOZORDER
             return 'resize'
         return 'rejected'
+
+
+def restore_application_frame(window):
+    """Undo an unaccepted borderless request on the same native window only."""
+    original = window.pop('_fullscreen_original_frame', None)
+    if not original:
+        return
+    user = _user32()
+    handle, *owner = window_key(window)
+    if _window_owner(user, handle) != tuple(owner):
+        return
+    style, (left, top, right, bottom) = original
+    with _monitor_coordinates(user):
+        current = user.GetWindowLongW(handle, -16)
+        user.SetWindowLongW(handle, -16, (current & ~0x00C40000) | (style & 0x00C40000))
+        user.SetWindowPos(handle, None, left, top, right - left, bottom - top, 0x4234)
 
 
 def last_input_tick():

@@ -40,9 +40,17 @@ window can remain open if the client does not accept monitor-filling placement.
 An active match is protected and its window is left alone.
 After a confirmed close, League allows a short foreground settling period
 when the Windows input marker is unchanged. A later, unrelated foreground
-without new input is observed passively. A verified reused landing window
-that disappears during handoff can trigger one normal Riot product launch
-for that ticket. Returning to the same browser after League actually took
+is observed passively, including when the generic input marker changes.
+That change revokes unrelated-window activation, but does not abort observation
+of an already launched destination. The ordinary activation request has a
+Windows application-activation fallback bound to one verified PID/window and
+the still-current source. No keystrokes or delayed helper actions are used.
+Riot's launcher can also receive fullscreen placement while League starts;
+it is still reported as `riot_client`, never as a ready League landing client.
+Captioned clients use borderless monitor placement with measured client-area
+coverage; unsuccessful or cancelled frame changes are restored.
+If a verified reused landing window disappears during handoff, the ticket
+can trigger one normal Riot product launch. Returning to the same browser after League actually took
 foreground can start a fresh ticket when cooldown permits, even if League
 remained windowed.
 
